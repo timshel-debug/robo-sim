@@ -255,5 +255,31 @@ public class EngineTests
         Assert.Equal(x, result.NewState.Pos!.X);
         Assert.Equal(y, result.NewState.Pos!.Y);
     }
+
+    // Additional test: Tabletop constructor validates inputs
+    [Theory]
+    [InlineData(0, 5)]
+    [InlineData(5, 0)]
+    [InlineData(-1, 5)]
+    [InlineData(5, -1)]
+    [InlineData(0, 0)]
+    public void Tabletop_InvalidDimensions_ThrowsArgumentOutOfRangeException(int width, int height)
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new Tabletop(width, height));
+    }
+
+    // Additional test: Tabletop constructor accepts valid dimensions
+    [Theory]
+    [InlineData(5, 5)]
+    [InlineData(10, 10)]
+    [InlineData(1, 1)]
+    [InlineData(3, 7)]
+    public void Tabletop_ValidDimensions_CreatesSuccessfully(int width, int height)
+    {
+        var tabletop = new Tabletop(width, height);
+        
+        Assert.Equal(width, tabletop.Width);
+        Assert.Equal(height, tabletop.Height);
+    }
 }
 

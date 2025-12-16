@@ -26,7 +26,7 @@ This application simulates a toy robot that can be placed on a tabletop grid and
 
 ## Requirements
 
-- .NET SDK 8.0 or later (tested with .NET 10.0)
+- .NET SDK 8.0 or later
 
 ## Building the Application
 
@@ -229,7 +229,7 @@ The test suite includes all required test cases from the specification:
 - ✅ C6: Invalid commands ignored
 - ✅ C7: Complex multi-command scenarios
 
-**Total Test Count**: 70 tests, all passing ✅
+**Total Test Count**: 79 tests, all passing ✅
 
 ## License
 

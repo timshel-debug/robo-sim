@@ -4,20 +4,29 @@ namespace RobotSim;
 
 /// <summary>
 /// The core engine that executes commands and manages robot state transitions.
-/// This is pure/deterministic logic with no I/O.
+/// This is pure/deterministic logic with no I/O, making it easily testable.
+/// Uses the Command pattern to process different command types polymorphically.
 /// </summary>
 public class Engine
 {
     private readonly Tabletop _tabletop;
 
+    /// <summary>
+    /// Initializes a new instance of the Engine class.
+    /// </summary>
+    /// <param name="tabletop">The tabletop on which the robot operates.</param>
     public Engine(Tabletop tabletop)
     {
-        _tabletop = tabletop;
+        _tabletop = tabletop ?? throw new ArgumentNullException(nameof(tabletop));
     }
 
     /// <summary>
     /// Executes a command and returns the new state and optional report output.
+    /// Invalid commands or commands that would cause the robot to fall are safely ignored.
     /// </summary>
+    /// <param name="state">The current robot state.</param>
+    /// <param name="command">The command to execute.</param>
+    /// <returns>A StepResult containing the new state and any report output.</returns>
     public StepResult Execute(RobotState state, ICommand command)
     {
         return command switch

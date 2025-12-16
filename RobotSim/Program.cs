@@ -1,9 +1,14 @@
-﻿using RobotSim;
+﻿namespace RobotSim;
 
-namespace RobotSim;
-
+/// <summary>
+/// Entry point for the Robot Simulator application.
+/// </summary>
 class Program
 {
+    /// <summary>
+    /// Main entry point. Reads commands from a file and executes them.
+    /// </summary>
+    /// <param name="args">Command line arguments. First argument can be path to commands file.</param>
     static void Main(string[] args)
     {
         // Determine the file path

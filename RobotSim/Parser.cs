@@ -4,13 +4,16 @@ namespace RobotSim;
 
 /// <summary>
 /// Parses command strings into ICommand objects.
+/// Supports case-insensitive parsing of PLACE, MOVE, LEFT, RIGHT, and REPORT commands.
 /// </summary>
 public class Parser
 {
     /// <summary>
     /// Attempts to parse a command string into an ICommand.
-    /// Returns true if parsing was successful, false otherwise.
     /// </summary>
+    /// <param name="line">The command string to parse.</param>
+    /// <param name="command">The parsed command if successful; otherwise null.</param>
+    /// <returns>True if parsing was successful; otherwise false.</returns>
     public bool TryParse(string line, out ICommand? command)
     {
         command = null;
@@ -91,23 +94,14 @@ public class Parser
             return false;
         }
 
-        // Parse Direction
-        var directionStr = argParts[2].Trim().ToUpperInvariant();
-        Direction? direction = directionStr switch
-        {
-            "NORTH" => Direction.North,
-            "EAST" => Direction.East,
-            "SOUTH" => Direction.South,
-            "WEST" => Direction.West,
-            _ => null
-        };
-
-        if (direction == null)
+        // Parse Direction using Enum.TryParse for robustness
+        var directionStr = argParts[2].Trim();
+        if (!Enum.TryParse<Direction>(directionStr, ignoreCase: true, out var direction))
         {
             return false;
         }
 
-        command = new PlaceCommand(x, y, direction.Value);
+        command = new PlaceCommand(x, y, direction);
         return true;
     }
 }
