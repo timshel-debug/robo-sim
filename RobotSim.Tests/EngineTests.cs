@@ -93,7 +93,7 @@ public class EngineTests
     [Fact]
     public void Execute_LeftCommand_RotatesCounterClockwise()
     {
-        var state = new RobotState(true, new Position(0, 0), Direction.North);
+        var state = new RobotState(new Position(0, 0), Direction.North);
 
         // NORTH -> WEST
         var result1 = _engine.Execute(state, new LeftCommand());
@@ -116,7 +116,7 @@ public class EngineTests
     [Fact]
     public void Execute_RightCommand_RotatesClockwise()
     {
-        var state = new RobotState(true, new Position(0, 0), Direction.North);
+        var state = new RobotState(new Position(0, 0), Direction.North);
 
         // NORTH -> EAST
         var result1 = _engine.Execute(state, new RightCommand());
@@ -143,7 +143,7 @@ public class EngineTests
     [InlineData(Direction.West, 2, 2, 1, 2)]  // West decrements X
     public void Execute_Move_MovesInCorrectDirection(Direction facing, int startX, int startY, int expectedX, int expectedY)
     {
-        var state = new RobotState(true, new Position(startX, startY), facing);
+        var state = new RobotState(new Position(startX, startY), facing);
 
         var result = _engine.Execute(state, new MoveCommand());
 
@@ -163,7 +163,7 @@ public class EngineTests
     [InlineData(3, 4, Direction.North)]  // Can't go north from (x,4)
     public void Execute_MoveAtEdge_BlockedAndStateUnchanged(int x, int y, Direction facing)
     {
-        var state = new RobotState(true, new Position(x, y), facing);
+        var state = new RobotState(new Position(x, y), facing);
 
         var result = _engine.Execute(state, new MoveCommand());
 
@@ -177,7 +177,7 @@ public class EngineTests
     [Fact]
     public void Execute_Report_OutputsCorrectFormat()
     {
-        var state = new RobotState(true, new Position(0, 1), Direction.North);
+        var state = new RobotState(new Position(0, 1), Direction.North);
 
         var result = _engine.Execute(state, new ReportCommand());
 
@@ -224,7 +224,7 @@ public class EngineTests
     [Fact]
     public void Execute_RotationCommands_DoNotChangePosition()
     {
-        var state = new RobotState(true, new Position(2, 3), Direction.North);
+        var state = new RobotState(new Position(2, 3), Direction.North);
 
         var result1 = _engine.Execute(state, new LeftCommand());
         Assert.Equal(2, result1.NewState.Pos!.X);
@@ -280,6 +280,83 @@ public class EngineTests
         
         Assert.Equal(width, tabletop.Width);
         Assert.Equal(height, tabletop.Height);
+    }
+
+    // Additional test: REPORT output is culture-invariant
+    [Fact]
+    public void Execute_Report_IsCultureInvariant()
+    {
+        var state = new RobotState(new Position(1, 2), Direction.North);
+        var originalCulture = System.Globalization.CultureInfo.CurrentCulture;
+        
+        try
+        {
+            // Test with Turkish culture (where 'I'.ToLower() != 'i')
+            System.Globalization.CultureInfo.CurrentCulture = 
+                System.Globalization.CultureInfo.GetCultureInfo("tr-TR");
+            
+            var result = _engine.Execute(state, new ReportCommand());
+            
+            // Should always output standard English direction names
+            Assert.Equal("1,2,NORTH", result.ReportOutput);
+            
+            // Test all directions
+            var testCases = new[]
+            {
+                (Direction.North, "NORTH"),
+                (Direction.East, "EAST"),
+                (Direction.South, "SOUTH"),
+                (Direction.West, "WEST")
+            };
+            
+            foreach (var (direction, expected) in testCases)
+            {
+                var testState = new RobotState(new Position(0, 0), direction);
+                var testResult = _engine.Execute(testState, new ReportCommand());
+                Assert.EndsWith(expected, testResult.ReportOutput);
+            }
+        }
+        finally
+        {
+            System.Globalization.CultureInfo.CurrentCulture = originalCulture;
+        }
+    }
+
+    // Additional test: Engine Execute guards against null inputs
+    [Fact]
+    public void Execute_NullState_ThrowsArgumentNullException()
+    {
+        Assert.Throws<ArgumentNullException>(() => 
+            _engine.Execute(null!, new MoveCommand()));
+    }
+
+    [Fact]
+    public void Execute_NullCommand_ThrowsArgumentNullException()
+    {
+        var state = RobotState.Initial();
+        Assert.Throws<ArgumentNullException>(() => 
+            _engine.Execute(state, null!));
+    }
+
+    // Additional test: IsPlaced is computed correctly
+    [Fact]
+    public void RobotState_IsPlaced_IsComputedProperty()
+    {
+        // Not placed when both are null
+        var state1 = new RobotState(null, null);
+        Assert.False(state1.IsPlaced);
+        
+        // Not placed when only position is set
+        var state2 = new RobotState(new Position(0, 0), null);
+        Assert.False(state2.IsPlaced);
+        
+        // Not placed when only direction is set
+        var state3 = new RobotState(null, Direction.North);
+        Assert.False(state3.IsPlaced);
+        
+        // Placed when both are set
+        var state4 = new RobotState(new Position(0, 0), Direction.North);
+        Assert.True(state4.IsPlaced);
     }
 }
 

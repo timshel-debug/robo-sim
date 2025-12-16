@@ -27,8 +27,12 @@ public class Engine
     /// <param name="state">The current robot state.</param>
     /// <param name="command">The command to execute.</param>
     /// <returns>A StepResult containing the new state and any report output.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when state or command is null.</exception>
     public StepResult Execute(RobotState state, ICommand command)
     {
+        ArgumentNullException.ThrowIfNull(state);
+        ArgumentNullException.ThrowIfNull(command);
+        
         return command switch
         {
             PlaceCommand place => ExecutePlace(state, place),
@@ -52,7 +56,7 @@ public class Engine
         }
 
         // Place the robot at the specified position and direction
-        var newState = new RobotState(true, position, place.Facing);
+        var newState = new RobotState(position, place.Facing);
         return new StepResult(newState, null);
     }
 
@@ -138,8 +142,8 @@ public class Engine
             return new StepResult(state, null);
         }
 
-        // Format: X,Y,DIRECTION
-        var output = $"{state.Pos.X},{state.Pos.Y},{state.Facing.Value.ToString().ToUpper()}";
+        // Format: X,Y,DIRECTION (use ToUpperInvariant for culture-safe output)
+        var output = $"{state.Pos.X},{state.Pos.Y},{state.Facing.Value.ToString().ToUpperInvariant()}";
         return new StepResult(state, output);
     }
 }

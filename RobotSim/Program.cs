@@ -9,7 +9,8 @@ class Program
     /// Main entry point. Reads commands from a file and executes them.
     /// </summary>
     /// <param name="args">Command line arguments. First argument can be path to commands file.</param>
-    static void Main(string[] args)
+    /// <returns>0 on success, 1 on error.</returns>
+    static int Main(string[] args)
     {
         // Determine the file path
         string filePath;
@@ -26,8 +27,7 @@ class Program
         if (!File.Exists(filePath))
         {
             Console.Error.WriteLine($"Error: File '{filePath}' not found.");
-            Environment.Exit(1);
-            return;
+            return 1;
         }
 
         // Initialize components
@@ -57,5 +57,7 @@ class Program
                 Console.WriteLine(result.ReportOutput);
             }
         }
+        
+        return 0;
     }
 }

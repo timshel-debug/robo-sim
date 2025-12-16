@@ -94,9 +94,22 @@ public class Parser
             return false;
         }
 
-        // Parse Direction using Enum.TryParse for robustness
+        // Parse Direction - must be one of the four named directions (not numeric)
         var directionStr = argParts[2].Trim();
+        
+        // Reject numeric inputs (Enum.TryParse accepts "0", "1", "2", "3" as valid)
+        if (int.TryParse(directionStr, out _))
+        {
+            return false;
+        }
+        
         if (!Enum.TryParse<Direction>(directionStr, ignoreCase: true, out var direction))
+        {
+            return false;
+        }
+        
+        // Ensure the parsed direction is one of the four defined values
+        if (!Enum.IsDefined(typeof(Direction), direction))
         {
             return false;
         }

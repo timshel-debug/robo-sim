@@ -116,5 +116,36 @@ public class ParserTests
         var placeCmd = Assert.IsType<PlaceCommand>(command);
         Assert.Equal(expected, placeCmd.Facing);
     }
+
+    // Additional test: Reject numeric direction values
+    [Theory]
+    [InlineData("PLACE 0,0,0")]
+    [InlineData("PLACE 0,0,1")]
+    [InlineData("PLACE 0,0,2")]
+    [InlineData("PLACE 0,0,3")]
+    [InlineData("PLACE 1,1,-1")]
+    [InlineData("PLACE 2,2,99")]
+    public void TryParse_NumericDirection_ReturnsFalse(string input)
+    {
+        var result = _parser.TryParse(input, out var command);
+
+        Assert.False(result);
+        Assert.Null(command);
+    }
+
+    // Additional test: Reject invalid direction names
+    [Theory]
+    [InlineData("PLACE 0,0,NORTHEAST")]
+    [InlineData("PLACE 0,0,NE")]
+    [InlineData("PLACE 0,0,UP")]
+    [InlineData("PLACE 0,0,DOWN")]
+    [InlineData("PLACE 0,0,INVALID")]
+    public void TryParse_InvalidDirectionName_ReturnsFalse(string input)
+    {
+        var result = _parser.TryParse(input, out var command);
+
+        Assert.False(result);
+        Assert.Null(command);
+    }
 }
 
